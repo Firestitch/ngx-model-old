@@ -1,1 +1,13 @@
-<fs-component></fs-component>
+<div>
+  <button mat-icon-button (click)="add()"><mat-icon>add</mat-icon></button>
+</div>
+
+<div fsModel #model>
+  <div  *ngFor="let object of objects"
+        fsModelObject (dragStop)="dragStop($event)"
+        [id]="object.id"
+        [ngStyle]="{ top: object.y1 + 'px', left: object.x1 + 'px' }">
+    <button mat-icon-button (click)="remove(object)"><mat-icon>clear</mat-icon></button>
+    <div>{{object.name}}</div>
+  </div>
+</div>

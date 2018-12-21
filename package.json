@@ -1,10 +1,10 @@
 {
-  "name": "@firestitch/package",
-  "description": "@firestitch/package",
+  "name": "@firestitch/model",
+  "description": "@firestitch/model",
   "version": "0.1.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Firestitch/ngx-package"
+    "url": "https://github.com/Firestitch/ngx-model"
   },
   "author": {
     "name": "Firestitch",
@@ -15,7 +15,7 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Firestitch/ngx-package/issues"
+    "url": "https://github.com/Firestitch/ngx-model/issues"
   },
   "main": "package/index.js",
   "typings": "package/index.d.ts",
@@ -80,7 +80,8 @@
     "webpack": "^4.20.2",
     "zone.js": "^0.8.26",
     "rxjs-compat": "^6.3.3",
-    "tslib": "^1.9.3"    
+    "tslib": "^1.9.3",
+    "jsplumb": "^2.8.6"
   },
   "engines": {
     "node": ">=6.0.0"

@@ -1,0 +1,25 @@
+.fs-model {
+  height: 600px;
+}
+
+.fs-model-object {
+  border: 2px solid #2196F3;
+  background: #fff;
+  width: 100px;
+  height: 100px;
+  text-align: center;
+  line-height: 100px;
+  border-radius: 3px;
+  font-size: 17px;
+
+  button {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}
+
+.fs-model-connection-label {
+  font-size: 14px;
+  color: #555;
+}

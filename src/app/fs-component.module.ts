@@ -1,7 +1,8 @@
 import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { FsComponentComponent } from './components/fs-component/fs-component.component';
+import { FsModelDirective } from './directives/fs-model/fs-model.directive';
+import { FsModelObjectDirective } from './directives/fs-model-object/fs-model-object.directive';
 // import { FsComponentService } from './services';
 
 @NgModule({
@@ -9,12 +10,14 @@ import { FsComponentComponent } from './components/fs-component/fs-component.com
     CommonModule,
   ],
   exports: [
-    FsComponentComponent,
+    FsModelDirective,
+    FsModelObjectDirective
   ],
   entryComponents: [
   ],
   declarations: [
-    FsComponentComponent,
+    FsModelDirective,
+    FsModelObjectDirective
   ],
   providers: [
     // FsComponentService,
