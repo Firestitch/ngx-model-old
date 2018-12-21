@@ -19,7 +19,7 @@ export class FsModelDirective implements AfterViewInit {
   private _queuedConnections = [];
   private _differ;
   private _jsPlumb = null;
-  private _modelObjects = new Map<string, FsModelObjectDirective>();
+  private _modelObjects = new Map<any, FsModelObjectDirective>();
 
   constructor(private _element: ElementRef, private differs: IterableDiffers) {
     this._differ = this.differs.find([]).create(null);
@@ -49,17 +49,17 @@ export class FsModelDirective implements AfterViewInit {
 
   private addModelObject(directive: FsModelObjectDirective) {
     directive.init(this._jsPlumb, this);
-    this._modelObjects.set(directive.id,directive);
+    this._modelObjects.set(directive.object,directive);
 
 
     for (let i = this._queuedConnections.length - 1; i >= 0; --i) {
       const connection = this._queuedConnections[i];
-      const modelObject1 = this._modelObjects.get(connection.id1);
-      const modelObject2 = this._modelObjects.get(connection.id2);
+      const sourceModel = this._modelObjects.get(connection.source);
+      const targetModel = this._modelObjects.get(connection.target);
 
-      if (modelObject1 && modelObject2) {
+      if (sourceModel && targetModel) {
         this._queuedConnections.splice(i, 1);
-        this.connect(connection.id1,connection.id2,connection.options);
+        this.connect(connection.source,connection.target,connection.options);
       }
     }
   }
@@ -73,7 +73,7 @@ export class FsModelDirective implements AfterViewInit {
       }
     });
 
-    this._modelObjects.delete(modelObject.id);
+    this._modelObjects.delete(modelObject.object);
   }
 
   private init() {
@@ -134,25 +134,21 @@ export class FsModelDirective implements AfterViewInit {
             }
           ]
         });
-
-    // this._jsPlumb.bind('click', function(info) {
-    //   debugger;
-    // });
   }
 
-  public connect(id1, id2, options?) {
+  public connect(source, target, options?) {
 
-    const modelObject1 = this._modelObjects.get(id1);
-    const modelObject2 = this._modelObjects.get(id2);
+    const sourceModel = this._modelObjects.get(source);
+    const targetModel = this._modelObjects.get(target);
 
-    if(!modelObject1 || !modelObject2) {
-      this._queuedConnections.push({ id1: id1, id2: id2, options: options });
+    if(!sourceModel || !targetModel) {
+      this._queuedConnections.push({ source: source, target: target, options: options });
       return;
     }
 
     const connection = this._jsPlumb.connect({
-      source:  modelObject1.element.nativeElement,
-      target:  modelObject2.element.nativeElement,
+      source:  sourceModel.element.nativeElement,
+      target:  targetModel.element.nativeElement,
       type: 'basicConnectionType',
       data: { options: options }
     });
@@ -164,8 +160,11 @@ export class FsModelDirective implements AfterViewInit {
         connection.addClass('fs-model-connection-click');
 
         connection.bind('click', (connection, originalEvent) => {
-          const data = connection.getData();
-          data.options.click.bind(this)(data.options.data, originalEvent);
+
+          if(connection.getData) {
+            const data = connection.getData();
+            data.options.click.bind(this)(data.options.data, originalEvent);
+          }
         });
       }
 

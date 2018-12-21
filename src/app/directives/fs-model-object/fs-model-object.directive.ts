@@ -15,7 +15,7 @@ export class FsModelObjectDirective implements OnInit {
   private _fsModelDirective: FsModelDirective;
 
   @Output() dragStop = new EventEmitter<any>();
-  @Input() id;
+  @Input() object;
 
   constructor(private _element: ElementRef) {}
 
@@ -66,7 +66,7 @@ export class FsModelObjectDirective implements OnInit {
           y1 = bottom - height;
         }
 
-        this.dragStop.emit({ directive: this, x1: x1, y1: y1 });
+        this.dragStop.emit({ object: this.object, x1: x1, y1: y1 });
       }
     });
   }

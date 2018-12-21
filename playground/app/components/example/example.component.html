@@ -5,7 +5,7 @@
 <div fsModel #model>
   <div  *ngFor="let object of objects"
         fsModelObject (dragStop)="dragStop($event)"
-        [id]="object.id"
+        [object]="object"
         [ngStyle]="{ top: object.y1 + 'px', left: object.x1 + 'px' }">
     <button mat-icon-button (click)="remove(object)"><mat-icon>clear</mat-icon></button>
     <div>{{object.name}}</div>

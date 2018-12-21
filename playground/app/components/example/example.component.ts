@@ -18,7 +18,7 @@ export class ExampleComponent implements AfterViewInit {
 
   ngAfterViewInit() {
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 8; i++) {
       this.add();
     }
   }
@@ -28,21 +28,29 @@ export class ExampleComponent implements AfterViewInit {
   }
 
   add() {
+
     const x1 = random(0, this.model.element.nativeElement.offsetWidth - 100 - 4);
     const y1 = random(0, this.model.element.nativeElement.offsetHeight - 100 - 4);
 
     const idx = this.objects.length;
-    this.objects.push({ name: 'Object ' + (idx + 1), x1: x1, y1: y1, id: idx + 1 });
 
-    if(idx>1) {
-      this.model.connect( idx - 1, idx,
+    const object = { name: 'Object ' + (idx + 1), x1: x1, y1: y1, id: idx + 1 };
+
+    this.objects.push(object);
+
+    if(idx) {
+
+      const object1 = this.objects[idx - 1];
+      const object2 = this.objects[idx];
+
+      this.model.connect(object1, object2,
         {
           label: 'Label ' + idx,
           click: (data, e) => {
             console.log(data, e);
           },
           data: {
-            object: idx
+            object: object
           }
       });
     }
