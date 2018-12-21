@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 
 import { FsModelDirective } from './directives/fs-model/fs-model.directive';
 import { FsModelObjectDirective } from './directives/fs-model-object/fs-model-object.directive';
-// import { FsComponentService } from './services';
 
 @NgModule({
   imports: [
@@ -18,16 +17,12 @@ import { FsModelObjectDirective } from './directives/fs-model-object/fs-model-ob
   declarations: [
     FsModelDirective,
     FsModelObjectDirective
-  ],
-  providers: [
-    // FsComponentService,
-  ],
+  ]
 })
-export class FsComponentModule {
+export class FsModelModule {
   static forRoot(): ModuleWithProviders {
     return {
-      ngModule: FsComponentModule,
-      // providers: [FsComponentService]
+      ngModule: FsModelModule
     };
   }
 }
