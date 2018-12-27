@@ -1,6 +1,6 @@
 import { QueryList, ElementRef, AfterViewInit, Directive, ContentChildren, IterableDiffers } from '@angular/core';
 import { jsPlumb } from 'jsplumb';
-import { FsModelObjectDirective } from 'src/app/directives/fs-model-object';
+import { FsModelObjectDirective } from '../fs-model-object/fs-model-object.directive';
 
 
 @Directive({
@@ -67,8 +67,8 @@ export class FsModelDirective implements AfterViewInit {
   private removeModelObject(modelObject: FsModelObjectDirective) {
 
     this._jsPlumb.getConnections().forEach(connection => {
-      if( connection.source.isEqualNode(modelObject.element.nativeElement) ||
-          connection.target.isEqualNode(modelObject.element.nativeElement)) {
+      if( connection.source.isEqualNode(modelObject.element.nativeElement.firstChild) ||
+          connection.target.isEqualNode(modelObject.element.nativeElement.firstChild)) {
         this._jsPlumb.deleteConnection(connection);
       }
     });
@@ -147,8 +147,8 @@ export class FsModelDirective implements AfterViewInit {
     }
 
     const connection = this._jsPlumb.connect({
-      source:  sourceModel.element.nativeElement,
-      target:  targetModel.element.nativeElement,
+      source:  sourceModel.element.nativeElement.firstChild,
+      target:  targetModel.element.nativeElement.firstChild,
       type: 'basicConnectionType',
       data: { options: options }
     });

@@ -1,7 +1,7 @@
 {
   "name": "@firestitch/model",
   "description": "@firestitch/model",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/Firestitch/ngx-model"
@@ -20,17 +20,17 @@
   "main": "package/index.js",
   "typings": "package/index.d.ts",
   "scripts": {
-    "package": "ng build fs-package",
+    "package": "cd tools && npm run cli:package",
     "package:test": "ng test fs-package",
     "package:publish": "cd package && npm publish --access=public",
-    "demo:build": "cd tools && npm run cli:demo:build",
+    "demo:build": "ng build --aot --prod",
     "serve": "ng serve"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.8.5",
     "@angular-devkit/build-ng-packagr": "~0.8.0",
     "@angular/animations": "^6.1.9",
-    "@angular/cdk": "^6.4.7",
+    "@angular/cdk": "^7.2.0",
     "@angular/cli": "~6.2.4",
     "@angular/common": "^6.1.9",
     "@angular/compiler": "^6.1.9",

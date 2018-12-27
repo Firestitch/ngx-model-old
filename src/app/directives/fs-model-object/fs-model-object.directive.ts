@@ -1,21 +1,26 @@
-import { OnInit, ElementRef, Directive, Output, Input } from '@angular/core';
+import { OnInit, ElementRef, Directive, Output, Input, HostBinding, Component } from '@angular/core';
 import { EventEmitter } from '@angular/core';
 import { FsModelDirective } from '../fs-model/fs-model.directive';
 
 
-@Directive({
+@Component({
   selector: '[fsModelObject]',
   'host': {
-    class: 'fs-model-object'
-  }
+    class: ''
+  },
+  template: '<div class="fs-model-object" [style.top.px]="y1" [style.left.px]="x1"><ng-content></ng-content></div>'
 })
 export class FsModelObjectDirective implements OnInit {
 
   private _jsPlumb: any;
   private _fsModelDirective: FsModelDirective;
+  private _start = [0,0];
 
   @Output() dragStop = new EventEmitter<any>();
   @Input() object;
+  @Input() scale = 1.5;
+  @Input() x1;
+  @Input() y1;
 
   constructor(private _element: ElementRef) {}
 
@@ -35,9 +40,21 @@ export class FsModelObjectDirective implements OnInit {
     this._jsPlumb = jsPlumb;
     this._fsModelDirective = fsModelDirective;
 
-    this._jsPlumb.draggable([this.element.nativeElement],
+    this._jsPlumb.draggable([this.element.nativeElement.firstChild],
     {
-      containment: 'parent',
+      start: (e) => {
+        this._start = e.pos;
+      },
+      drag: (e) => {
+
+        let dx = e.pos[0] - this._start[0];
+        let dy = e.pos[1] - this._start[1];
+
+        dx /= this.scale;
+        dy /= this.scale;
+
+        //e.drag.moveBy(dx, dy, e.e);
+      },
       stop: event => {
 
         const canvas = this._fsModelDirective.element.nativeElement;
