@@ -18,7 +18,7 @@ export class FsModelObjectDirective implements OnInit {
 
   @Output() dragStop = new EventEmitter<any>();
   @Input() object;
-  @Input() scale = 1.5;
+  @Input() scale = 1;
   @Input() x1;
   @Input() y1;
 
@@ -40,9 +40,10 @@ export class FsModelObjectDirective implements OnInit {
     this._jsPlumb = jsPlumb;
     this._fsModelDirective = fsModelDirective;
 
-    this._jsPlumb.draggable([this.element.nativeElement.firstChild],
+    const instance = this._jsPlumb.draggable([this.element.nativeElement.firstChild],
     {
       start: (e) => {
+        instance.setZoom(this.scale);
         this._start = e.pos;
       },
       drag: (e) => {
