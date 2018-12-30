@@ -1,6 +1,8 @@
-import { OnInit, ElementRef, Directive, Output, Input, HostBinding, Component } from '@angular/core';
+import { OnInit, ElementRef, Directive, Output, Input, HostBinding, QueryList, AfterViewInit, IterableDiffers, ViewChildren, ContentChildren, AfterContentInit } from '@angular/core';
 import { EventEmitter } from '@angular/core';
 import { FsModelDirective } from '../fs-model/fs-model.directive';
+import { DefaultConnectionType } from '../../helpers/consts';
+import { FsModelEndpointSourceDirective } from '../fs-model-endpoint-source';
 
 
 @Directive({
@@ -9,31 +11,27 @@ import { FsModelDirective } from '../fs-model/fs-model.directive';
     class: 'fs-model-object'
   }
 })
-export class FsModelObjectDirective implements OnInit {
+export class FsModelObjectDirective {
 
   private _jsPlumb: any;
   private _fsModelDirective: FsModelDirective;
-  private _start = [0,0];
 
-  @HostBinding('style.top.px') y1;
-  @HostBinding('style.left.px') x1;
+  @HostBinding('style.top.px') y1: number;
+  @HostBinding('style.left.px') x1: number;
 
   @Output() dragStop = new EventEmitter<any>();
-  @Input() object;
+  @Input() data;
   @Input() scale = 1;
 
-  @Input('x1') set _x1(value: boolean) {
+  @Input('x1') set _x1(value: number) {
     this.x1 = value;
   }
 
-  @Input('y1') set _y1(value: boolean) {
+  @Input('y1') set _y1(value: number) {
     this.y1 = value;
   }
 
   constructor(private _element: ElementRef) {}
-
-  ngOnInit() {
-  }
 
   get element(): ElementRef {
     return this._element;
@@ -52,7 +50,6 @@ export class FsModelObjectDirective implements OnInit {
     {
       start: (e) => {
         this._jsPlumb.setZoom(this.scale);
-        this._start = e.pos;
       },
       stop: event => {
 
@@ -82,17 +79,17 @@ export class FsModelObjectDirective implements OnInit {
           y1 = bottom - height;
         }
 
-        this.dragStop.emit({ object: this.object, x1: x1, y1: y1 });
+        this.dragStop.emit({ data: this.data, x1: x1, y1: y1 });
       }
     });
 
     this._jsPlumb.makeSource(this.element.nativeElement, {
-      filter: ".fs-model-endpoint",
-      connectionType: "basicConnectionType",
+      filter: '.fs-model-endpoint-source',
+      connectionType: DefaultConnectionType
     });
 
     this._jsPlumb.makeTarget(this.element.nativeElement, {
-        allowLoopback: true,
+      allowLoopback: true
     });
   }
 }

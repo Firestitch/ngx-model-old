@@ -16,7 +16,7 @@
     border-radius: 3px;
     font-size: 17px;
 
-    .fs-model-endpoint {
+    .fs-model-endpoint-source {
       position: absolute;
       width: 10px;
       height: 10px;
@@ -45,7 +45,7 @@
       }
     }
 
-    &:hover .fs-model-endpoint {
+    &:hover:not(.jtk-drag):not(.jtk-drag-hover) .fs-model-endpoint-source {
       display: block;
     }
 

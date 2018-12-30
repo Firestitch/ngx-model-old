@@ -1,6 +1,8 @@
 import { Component, AfterViewInit, ViewChild, OnInit } from '@angular/core';
 import { FsModelDirective } from 'src/app/directives/fs-model';
 import { random } from 'lodash';
+import { FsPrompt } from '@firestitch/prompt';
+import { of, Observable } from 'rxjs';
 
 
 @Component({
@@ -12,9 +14,12 @@ export class ExampleComponent implements AfterViewInit {
 
   @ViewChild(FsModelDirective)
   public model: FsModelDirective;
+  public connectionCreated;
   public objects = [];
 
-  constructor() {}
+  constructor(private fsPrompt: FsPrompt) {
+    this.connectionCreated = this._connectionCreated.bind(this);
+  }
 
   ngAfterViewInit() {
 
@@ -45,10 +50,14 @@ export class ExampleComponent implements AfterViewInit {
 
       this.model.connect(object1, object2,
         {
-          label: 'Label ' + idx,
-          click: (data, e) => {
-            console.log(data, e);
-          },
+          overlays: [
+            {
+              type: 'label',
+              label: 'Label ' + idx,
+              click: this.connectionLabelClick.bind(this)
+            }
+          ],
+          click: this.connectionLabelClick.bind(this),
           data: {
             object: object
           }
@@ -56,7 +65,33 @@ export class ExampleComponent implements AfterViewInit {
     }
   }
 
+  private _connectionCreated(e) {
+    if(e.event) {
+      return of(
+        {
+          overlays: [
+            {
+              type: 'label',
+              label: 'Label ',
+              click: this.connectionLabelClick.bind(this)
+            }
+          ],
+          click: this.connectionLabelClick.bind(this)
+        });
+    }
+  }
+
+  connectionLabelClick(e) {
+    this.fsPrompt.confirm({
+      title: 'Confirm',
+      template: 'Would you like to delete this connection?'
+    }).subscribe(() => {
+      this.model.disconnect(e.connection);
+
+    });
+  }
+
   dragStop(e) {
-    console.log(e);
+    console.log('dragStop',e);
   }
 }

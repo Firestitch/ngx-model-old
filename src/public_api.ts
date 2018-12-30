@@ -5,4 +5,5 @@
 export { FsModelModule } from './app/fs-model.module';
 export { FsModelObjectDirective } from './app/directives/fs-model-object';
 export { FsModelDirective } from './app/directives/fs-model';
-export { FsModelEndpointDirective } from './app/directives/fs-model-endpoint';
+export { FsModelEndpointSourceDirective } from './app/directives/fs-model-endpoint-source';
+export { FsModelEndpointTargetDirective } from './app/directives/fs-model-endpoint-target';

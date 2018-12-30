@@ -2,19 +2,20 @@
   <button mat-icon-button (click)="add()"><mat-icon>add</mat-icon></button>
 </div>
 
-<div fsModel #model>
+<div fsModel #model [connectionCreated]="connectionCreated">
   <div *ngFor="let object of objects"
         class="object"
         fsModelObject
         (dragStop)="dragStop($event)"
-        [object]="object"
+        [data]="object"
         [x1]="object.x1"
-        [y1]="object.y1">
+        [y1]="object.y1"
+        fsModelEndpointTarget>
     <button mat-icon-button (click)="remove(object)"><mat-icon>clear</mat-icon></button>
     <div>{{object.name}}</div>
-    <div fsModelEndpoint class="top"></div>
-    <div fsModelEndpoint class="left"></div>
-    <div fsModelEndpoint class="right"></div>
-    <div fsModelEndpoint class="bottom"></div>
+    <div fsModelEndpointSource class="top"></div>
+    <div fsModelEndpointSource class="left"></div>
+    <div fsModelEndpointSource class="right"></div>
+    <div fsModelEndpointSource class="bottom"></div>
   </div>
 </div>

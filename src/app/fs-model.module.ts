@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 
 import { FsModelDirective } from './directives/fs-model/fs-model.directive';
 import { FsModelObjectDirective } from './directives/fs-model-object/fs-model-object.directive';
-import { FsModelEndpointDirective } from './directives/fs-model-endpoint/fs-model-endpoint.directive';
+import { FsModelEndpointSourceDirective } from './directives/fs-model-endpoint-source/fs-model-endpoint-source.directive';
+import { FsModelEndpointTargetDirective } from './directives/fs-model-endpoint-target/fs-model-endpoint-target.directive';
 
 @NgModule({
   imports: [
@@ -12,14 +13,16 @@ import { FsModelEndpointDirective } from './directives/fs-model-endpoint/fs-mode
   exports: [
     FsModelDirective,
     FsModelObjectDirective,
-    FsModelEndpointDirective
+    FsModelEndpointSourceDirective,
+    FsModelEndpointTargetDirective
   ],
   entryComponents: [
   ],
   declarations: [
     FsModelDirective,
     FsModelObjectDirective,
-    FsModelEndpointDirective
+    FsModelEndpointSourceDirective,
+    FsModelEndpointTargetDirective
   ]
 })
 export class FsModelModule {

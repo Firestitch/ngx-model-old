@@ -10,12 +10,12 @@
   z-index: 8;
   user-select: text;
 
-  &:active {
+  &:active,
+  &.jtk-drag-hover {
     box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
                 0 8px 10px 1px rgba(0, 0, 0, 0.14),
                 0 3px 14px 2px rgba(0, 0, 0, 0.12);
   }
-
 }
 
 .fs-model-connection-label {
@@ -25,7 +25,7 @@
   border-radius: 2px;
 }
 
-.fs-model-connection-click path,
-.fs-model-connection-label.clickable {
+.fs-model-connection.fs-model-clickable path,
+.fs-model-connection-label.fs-model-clickable {
   cursor: pointer;
 }
