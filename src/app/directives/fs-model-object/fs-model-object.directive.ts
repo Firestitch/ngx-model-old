@@ -3,12 +3,11 @@ import { EventEmitter } from '@angular/core';
 import { FsModelDirective } from '../fs-model/fs-model.directive';
 
 
-@Component({
+@Directive({
   selector: '[fsModelObject]',
   'host': {
-    class: ''
-  },
-  template: '<div class="fs-model-object" [style.top.px]="y1" [style.left.px]="x1"><ng-content></ng-content></div>'
+    class: 'fs-model-object'
+  }
 })
 export class FsModelObjectDirective implements OnInit {
 
@@ -16,11 +15,20 @@ export class FsModelObjectDirective implements OnInit {
   private _fsModelDirective: FsModelDirective;
   private _start = [0,0];
 
+  @HostBinding('style.top.px') y1;
+  @HostBinding('style.left.px') x1;
+
   @Output() dragStop = new EventEmitter<any>();
   @Input() object;
   @Input() scale = 1;
-  @Input() x1;
-  @Input() y1;
+
+  @Input('x1') set _x1(value: boolean) {
+    this.x1 = value;
+  }
+
+  @Input('y1') set _y1(value: boolean) {
+    this.y1 = value;
+  }
 
   constructor(private _element: ElementRef) {}
 
@@ -40,21 +48,11 @@ export class FsModelObjectDirective implements OnInit {
     this._jsPlumb = jsPlumb;
     this._fsModelDirective = fsModelDirective;
 
-    const instance = this._jsPlumb.draggable([this.element.nativeElement.firstChild],
+    this._jsPlumb.draggable([this.element.nativeElement],
     {
       start: (e) => {
-        instance.setZoom(this.scale);
+        this._jsPlumb.setZoom(this.scale);
         this._start = e.pos;
-      },
-      drag: (e) => {
-
-        let dx = e.pos[0] - this._start[0];
-        let dy = e.pos[1] - this._start[1];
-
-        dx /= this.scale;
-        dy /= this.scale;
-
-        //e.drag.moveBy(dx, dy, e.e);
       },
       stop: event => {
 
@@ -86,6 +84,15 @@ export class FsModelObjectDirective implements OnInit {
 
         this.dragStop.emit({ object: this.object, x1: x1, y1: y1 });
       }
+    });
+
+    this._jsPlumb.makeSource(this.element.nativeElement, {
+      filter: ".fs-model-endpoint",
+      connectionType: "basicConnectionType",
+    });
+
+    this._jsPlumb.makeTarget(this.element.nativeElement, {
+        allowLoopback: true,
     });
   }
 }

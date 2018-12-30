@@ -51,7 +51,6 @@ export class FsModelDirective implements AfterViewInit {
     directive.init(this._jsPlumb, this);
     this._modelObjects.set(directive.object,directive);
 
-
     for (let i = this._queuedConnections.length - 1; i >= 0; --i) {
       const connection = this._queuedConnections[i];
       const sourceModel = this._modelObjects.get(connection.source);
@@ -84,7 +83,7 @@ export class FsModelDirective implements AfterViewInit {
       Connector: [
         'Flowchart',
         { stub: [40, 60],
-          gap: 7,
+          gap: 27,
           cornerRadius: 5,
           alwaysRespectStubs: true
         }
@@ -160,7 +159,6 @@ export class FsModelDirective implements AfterViewInit {
         connection.addClass('fs-model-connection-click');
 
         connection.bind('click', (connection, originalEvent) => {
-
           if(connection.getData) {
             const data = connection.getData();
             data.options.click.bind(this)(data.options.data, originalEvent);
@@ -172,12 +170,11 @@ export class FsModelDirective implements AfterViewInit {
 
         let cssClass = 'fs-model-connection-label';
         if(options.click) {
-          cssClass += ' fs-model-label-click';
+          cssClass += ' clickable';
         }
 
         connection.addOverlay(['Label', {
           label: options.label,
-          location: 0.20,
           cssClass: cssClass
         }]);
       }

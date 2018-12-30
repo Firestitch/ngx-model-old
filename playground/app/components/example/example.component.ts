@@ -18,7 +18,7 @@ export class ExampleComponent implements AfterViewInit {
 
   ngAfterViewInit() {
 
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 5; i++) {
       this.add();
     }
   }

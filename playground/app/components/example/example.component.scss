@@ -16,6 +16,39 @@
     border-radius: 3px;
     font-size: 17px;
 
+    .fs-model-endpoint {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #2196F3;
+      border-radius: 50%;
+      display: none;
+
+      &.top {
+        left: calc(50% - 7px);
+        top: -7px;
+      }
+
+      &.bottom {
+        left: calc(50% - 7px);
+        bottom: -7px;
+      }
+
+      &.right {
+        right: -7px;
+        bottom: calc(50% - 7px);
+      }
+
+      &.left {
+        left: -7px;
+        bottom: calc(50% - 7px);
+      }
+    }
+
+    &:hover .fs-model-endpoint {
+      display: block;
+    }
+
     button {
       position: absolute;
       top: 0;
@@ -28,3 +61,5 @@
     color: #555;
   }
 }
+
+

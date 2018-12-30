@@ -3,8 +3,8 @@
 </div>
 
 <div fsModel #model>
-  <div  *ngFor="let object of objects"
-
+  <div *ngFor="let object of objects"
+        class="object"
         fsModelObject
         (dragStop)="dragStop($event)"
         [object]="object"
@@ -12,5 +12,9 @@
         [y1]="object.y1">
     <button mat-icon-button (click)="remove(object)"><mat-icon>clear</mat-icon></button>
     <div>{{object.name}}</div>
+    <div fsModelEndpoint class="top"></div>
+    <div fsModelEndpoint class="left"></div>
+    <div fsModelEndpoint class="right"></div>
+    <div fsModelEndpoint class="bottom"></div>
   </div>
 </div>
