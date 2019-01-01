@@ -1,10 +1,9 @@
-import { QueryList, ElementRef, AfterViewInit, Directive, ContentChildren, IterableDiffers, ViewChildren, Input } from '@angular/core';
+import { QueryList, ElementRef, AfterViewInit, Directive, ContentChildren, IterableDiffers, ViewChildren, Input, EventEmitter, Output } from '@angular/core';
 import { jsPlumb } from 'jsplumb';
 import { FsModelObjectDirective } from '../fs-model-object/fs-model-object.directive';
 import { guid } from '@firestitch/common/util';
 import { filter } from 'lodash';
-import { DefaultConnectionType } from '../../helpers/consts';
-import { Observable } from "rxjs";
+import { ConnectionConfig } from '../../interfaces';
 
 
 @Directive({
@@ -18,7 +17,7 @@ import { Observable } from "rxjs";
 })
 export class FsModelDirective implements AfterViewInit {
 
-  @Input() connectionCreated;
+  @Output() connectionCreated = new EventEmitter();
 
   fsModelObjects: QueryList<FsModelObjectDirective>;
 
@@ -53,6 +52,77 @@ export class FsModelDirective implements AfterViewInit {
       }
     });
   }
+  public configConnection(connection, config: ConnectionConfig = {}) {
+    connection.setData({ data: config.data });
+
+    connection.addClass('fs-model-connection');
+
+    if(config) {
+
+      if(config.click) {
+        connection.addClass('fs-model-clickable');
+
+        connection.bind('click', (e, originalEvent) => {
+            const data = {  data: connection.getData(),
+                            event: originalEvent,
+                            connection: connection };
+
+            if (e.type) {
+              const overlay = filter(config.overlays, { id: e.id })[0];
+
+              if (overlay && overlay.click) {
+                overlay.click.bind(this)(data);
+              }
+            } else {
+              config.click.bind(this)(data);
+            }
+        });
+      }
+
+      if (config.overlays) {
+        config.overlays.forEach(overlay => {
+
+          if (!overlay.id) {
+            overlay.id = guid();
+          }
+
+          let cssClass = 'fs-model-connection-label';
+          if(overlay.click) {
+            cssClass += ' fs-model-clickable';
+          }
+
+          connection.addOverlay(['Label',
+          {
+            label: overlay.label,
+            cssClass: cssClass,
+            id: overlay.id
+          }]);
+        });
+      }
+    }
+  }
+
+  public connect(source, target, config: ConnectionConfig = {}) {
+
+    const sourceModel = this._modelObjects.get(source);
+    const targetModel = this._modelObjects.get(target);
+
+    if(!sourceModel || !targetModel) {
+      this._queuedConnections.push({ source: source, target: target, config: config });
+      return;
+    }
+
+    const connection = this._jsPlumb.connect({
+      source:  sourceModel.element.nativeElement,
+      target:  targetModel.element.nativeElement
+    });
+
+    this.configConnection(connection, config);
+  }
+
+  public disconnect(connection) {
+    this._jsPlumb.deleteConnection(connection);
+  }
 
   private addModelObject(directive: FsModelObjectDirective) {
     directive.init(this._jsPlumb, this);
@@ -65,7 +135,7 @@ export class FsModelDirective implements AfterViewInit {
 
       if (sourceModel && targetModel) {
         this._queuedConnections.splice(i, 1);
-        this.connect(connection.source,connection.target,connection.options);
+        this.connect(connection.source,connection.target,connection.config);
       }
     }
   }
@@ -89,66 +159,29 @@ export class FsModelDirective implements AfterViewInit {
 
   private init() {
 
-    this._jsPlumb = jsPlumb.getInstance({
-      ConnectionsDetachable: false,
-      EndpointStyle: { fill: 'transparent', stroke: 'transparent' },
-      Connector: [
-        'Flowchart',
-        { stub: [40, 60],
-          gap: 27,
-          cornerRadius: 5,
-          alwaysRespectStubs: true
-        }
-      ],
-      HoverPaintStyle: {
-        stroke: '#2196f3'
-      },
-      ConnectionOverlays: [
-        [ 'Label', {
-            location: 0.5,
-            id: 'label',
-            cssClass: 'aLabel'
-        }],
-        [ 'Arrow', {
-            location: 1,
-            id: 'arrow',
-            length: 10,
-            width: 10,
-            foldback: 1
-        }]
-      ]
+    this._jsPlumb = jsPlumb.getInstance();
+
+    this._jsPlumb.bind('connection',(info: any, e: Event) => {
+      this.connectionCreated.emit(Object.assign(info,{ event: e }));
     });
 
-    this._jsPlumb.bind('connection',(info, e) => {
-
-      if (this.connectionCreated) {
-        info.event = e;
-        const result = this.connectionCreated(info);
-
-        if (result instanceof Observable) {
-          result.subscribe(options => {
-            this._processConnection(info.connection, options);
-          });
-        }
-      }
-    });
-
-    this._jsPlumb
-      .registerConnectionType(DefaultConnectionType,
-        {	anchor: 'Continuous',
-          paintStyle: {
+    this._jsPlumb.importDefaults(
+        {	ConnectionsDetachable: false,
+          Anchor: 'Continuous',
+          EndpointStyle: { fill: 'transparent', stroke: 'transparent' },
+          PaintStyle: {
             stroke: '#2196f3',
             strokeWidth: 2,
             outlineStroke: 'transparent',
             outlineWidth: 0
           },
-          hoverPaintStyle: {
+          HoverPaintStyle: {
             stroke: '#2196f3',
             strokeWidth: 4,
             outlineStroke: 'transparent',
             outlineWidth: 0
           },
-          connector: [
+          Connector: [
             'Flowchart',
             {
               stub: [40, 60],
@@ -156,80 +189,16 @@ export class FsModelDirective implements AfterViewInit {
               cornerRadius: 5,
               alwaysRespectStubs: true
             }
+          ],
+          Overlays: [
+            [ 'Arrow', {
+                location: 1,
+                id: 'arrow',
+                length: 10,
+                width: 10,
+                foldback: 1
+            }]
           ]
         });
-  }
-
-  public disconnect(connection) {
-    this._jsPlumb.deleteConnection(connection);
-  }
-
-  private _processConnection(connection, options) {
-    connection.setData({ options: options });
-
-    connection.addClass('fs-model-connection');
-
-    if(options) {
-
-      if(options.click) {
-        connection.addClass('fs-model-clickable');
-
-        connection.bind('click', (e, originalEvent) => {
-            const data = {  data: connection.getData(),
-                            event: originalEvent,
-                            connection: connection };
-
-            if (e.type) {
-              const overlay = filter(options.overlays, { id: e.id })[0];
-
-              if (overlay && overlay.click) {
-                overlay.click.bind(this)(data);
-              }
-            } else {
-              options.click.bind(this)(data);
-            }
-        });
-      }
-
-      if (options.overlays) {
-        options.overlays.forEach(overlay => {
-
-          if (!overlay.id) {
-            overlay.id = guid();
-          }
-
-          let cssClass = 'fs-model-connection-label';
-          if(overlay.click) {
-            cssClass += ' fs-model-clickable';
-          }
-
-          connection.addOverlay(['Label',
-          {
-            label: overlay.label,
-            cssClass: cssClass,
-            id: overlay.id
-          }]);
-        });
-      }
-    }
-  }
-
-  public connect(source, target, options?) {
-
-    const sourceModel = this._modelObjects.get(source);
-    const targetModel = this._modelObjects.get(target);
-
-    if(!sourceModel || !targetModel) {
-      this._queuedConnections.push({ source: source, target: target, options: options });
-      return;
-    }
-
-    const connection = this._jsPlumb.connect({
-      source:  sourceModel.element.nativeElement,
-      target:  targetModel.element.nativeElement,
-      type: DefaultConnectionType
-    });
-
-    this._processConnection(connection, options);
   }
 }

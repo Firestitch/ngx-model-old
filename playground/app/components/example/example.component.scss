@@ -16,38 +16,10 @@
     border-radius: 3px;
     font-size: 17px;
 
-    .fs-model-endpoint-source {
-      position: absolute;
-      width: 10px;
-      height: 10px;
+    .fs-model-object-endpoint-source {
       background: #2196F3;
-      border-radius: 50%;
-      display: none;
-
-      &.top {
-        left: calc(50% - 7px);
-        top: -7px;
-      }
-
-      &.bottom {
-        left: calc(50% - 7px);
-        bottom: -7px;
-      }
-
-      &.right {
-        right: -7px;
-        bottom: calc(50% - 7px);
-      }
-
-      &.left {
-        left: -7px;
-        bottom: calc(50% - 7px);
-      }
     }
 
-    &:hover:not(.jtk-drag):not(.jtk-drag-hover) .fs-model-endpoint-source {
-      display: block;
-    }
 
     button {
       position: absolute;

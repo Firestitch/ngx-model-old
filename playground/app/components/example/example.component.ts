@@ -3,6 +3,7 @@ import { FsModelDirective } from 'src/app/directives/fs-model';
 import { random } from 'lodash';
 import { FsPrompt } from '@firestitch/prompt';
 import { of, Observable } from 'rxjs';
+import { ConnectionOverlayType } from 'src/app/helpers';
 
 
 @Component({
@@ -14,11 +15,9 @@ export class ExampleComponent implements AfterViewInit {
 
   @ViewChild(FsModelDirective)
   public model: FsModelDirective;
-  public connectionCreated;
   public objects = [];
 
   constructor(private fsPrompt: FsPrompt) {
-    this.connectionCreated = this._connectionCreated.bind(this);
   }
 
   ngAfterViewInit() {
@@ -48,11 +47,10 @@ export class ExampleComponent implements AfterViewInit {
       const object1 = this.objects[idx - 1];
       const object2 = this.objects[idx];
 
-      this.model.connect(object1, object2,
-        {
+      let config = {
           overlays: [
             {
-              type: 'label',
+              type: ConnectionOverlayType.Label,
               label: 'Label ' + idx,
               click: this.connectionLabelClick.bind(this)
             }
@@ -61,23 +59,26 @@ export class ExampleComponent implements AfterViewInit {
           data: {
             object: object
           }
-      });
+      };
+
+      this.model.connect(object1, object2, config);
     }
   }
 
-  private _connectionCreated(e) {
+  public connectionCreated(e) {
     if(e.event) {
-      return of(
-        {
-          overlays: [
-            {
-              type: 'label',
-              label: 'Label ',
-              click: this.connectionLabelClick.bind(this)
-            }
-          ],
-          click: this.connectionLabelClick.bind(this)
-        });
+      const config =  {
+        overlays: [
+          {
+            type: ConnectionOverlayType.Label,
+            label: '<b>New Connection Label</b>',
+            click: this.connectionLabelClick.bind(this)
+          }
+        ],
+        click: this.connectionLabelClick.bind(this)
+      };
+
+      this.model.configConnection(e.connection,config);
     }
   }
 

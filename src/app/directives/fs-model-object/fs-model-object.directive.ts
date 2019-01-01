@@ -1,8 +1,6 @@
-import { OnInit, ElementRef, Directive, Output, Input, HostBinding, QueryList, AfterViewInit, IterableDiffers, ViewChildren, ContentChildren, AfterContentInit } from '@angular/core';
+import { ElementRef, Directive, Output, Input, HostBinding } from '@angular/core';
 import { EventEmitter } from '@angular/core';
 import { FsModelDirective } from '../fs-model/fs-model.directive';
-import { DefaultConnectionType } from '../../helpers/consts';
-import { FsModelEndpointSourceDirective } from '../fs-model-endpoint-source';
 
 
 @Directive({
@@ -43,9 +41,8 @@ export class FsModelObjectDirective {
       return;
     }
 
-    this._jsPlumb = jsPlumb;
     this._fsModelDirective = fsModelDirective;
-
+    this._jsPlumb = jsPlumb;
     this._jsPlumb.draggable([this.element.nativeElement],
     {
       start: (e) => {
@@ -84,8 +81,7 @@ export class FsModelObjectDirective {
     });
 
     this._jsPlumb.makeSource(this.element.nativeElement, {
-      filter: '.fs-model-endpoint-source',
-      connectionType: DefaultConnectionType
+      filter: '.fs-model-object-endpoint-source'
     });
 
     this._jsPlumb.makeTarget(this.element.nativeElement, {
