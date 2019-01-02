@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { FsModelDirective } from './directives/fs-model/fs-model.directive';
 import { FsModelObjectDirective } from './directives/fs-model-object/fs-model-object.directive';
-import { FsModelObjectEndpointSourceDirective } from './directives/fs-model-endpoint-source/fs-model-object-endpoint-source.directive';
+import { FsModelObjectEndpointSourceDirective } from './directives/fs-model-object-endpoint-source/fs-model-object-endpoint-source.directive';
 
 @NgModule({
   imports: [
