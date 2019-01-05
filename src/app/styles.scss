@@ -22,35 +22,35 @@
     &.north,
     &.north-east,
     &.north-west {
-      top: -7px;
+      top: -5px;
     }
 
     &.east,
     &.west {
-      bottom: calc(50% - 7px);
+      bottom: calc(50% - 5px);
     }
 
     &.north,
     &.south {
-      left: calc(50% - 7px);
+      left: calc(50% - 5px);
     }
 
     &.east,
     &.north-east,
     &.south-east {
-      right: -7px;
+      right: -5px;
     }
 
     &.west,
     &.north-west,
     &.south-west {
-      left: -7px;
+      left: -5px;
     }
 
     &.south,
     &.south-east,
     &.south-west {
-      bottom: -7px;
+      bottom: -5px;
     }
   }
 
