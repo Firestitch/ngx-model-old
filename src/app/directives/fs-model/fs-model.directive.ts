@@ -1,4 +1,4 @@
-import { QueryList, ElementRef, AfterViewInit, Directive, ContentChildren, IterableDiffers, ViewChildren, Input, EventEmitter, Output } from '@angular/core';
+import { QueryList, ElementRef, AfterViewInit, Directive, ContentChildren, IterableDiffers, EventEmitter, Output, OnDestroy, OnInit } from '@angular/core';
 import { jsPlumb } from 'jsplumb';
 import { FsModelObjectDirective } from '../fs-model-object/fs-model-object.directive';
 import { guid } from '@firestitch/common/util';
@@ -10,16 +10,12 @@ import { ConnectionConfig } from '../../interfaces';
   selector: '[fsModel]',
   host: {
     class: 'fs-model'
-  },
-  queries: {
-    fsModelObjects: new ContentChildren(FsModelObjectDirective)
-  },
+  }
 })
-export class FsModelDirective implements AfterViewInit {
+export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
 
   @Output() connectionCreated = new EventEmitter();
-
-  fsModelObjects: QueryList<FsModelObjectDirective>;
+  @ContentChildren(FsModelObjectDirective) fsModelObjects: QueryList<FsModelObjectDirective>;
 
   private _queuedConnections = [];
   private _differ;
@@ -35,12 +31,21 @@ export class FsModelDirective implements AfterViewInit {
     return this._element;
   }
 
+  ngOnInit() {
+  }
+
   ngAfterViewInit() {
 
-    this.fsModelObjects.changes.subscribe(changes => {
+    const changeDiff = this._differ.diff(this.fsModelObjects);
+    if(changeDiff) {
+      changeDiff.forEachAddedItem(change => {
+        this.addModelObject(change.item);
+      });
+    }
 
-      let changeDiff = this._differ.diff(changes);
+    this.fsModelObjects.changes.subscribe(fsModelObjects => {
 
+      const changeDiff = this._differ.diff(fsModelObjects);
       if (changeDiff) {
         changeDiff.forEachAddedItem((change) => {
           this.addModelObject(change.item);
@@ -52,32 +57,35 @@ export class FsModelDirective implements AfterViewInit {
       }
     });
   }
-  public configConnection(connection, config: ConnectionConfig = {}) {
+
+  ngOnDestroy() {
+    this._jsPlumb.reset();
+  }
+
+  public applyConnectionConfig(connection, config: ConnectionConfig = {}) {
     connection.setData({ data: config.data });
 
     connection.addClass('fs-model-connection');
 
     if(config) {
 
-      if(config.click) {
-        connection.addClass('fs-model-clickable');
+      connection.addClass('fs-model-clickable');
 
-        connection.bind('click', (e, originalEvent) => {
-            const data = {  data: connection.getData(),
-                            event: originalEvent,
-                            connection: connection };
+      connection.bind('click', (e, originalEvent) => {
+        const data = {  data: connection.getData(),
+                        event: originalEvent,
+                        connection: connection };
 
-            if (e.type) {
-              const overlay = filter(config.overlays, { id: e.id })[0];
+        if (e.type) {
+          const overlay = filter(config.overlays, { id: e.id })[0];
 
-              if (overlay && overlay.click) {
-                overlay.click.bind(this)(data);
-              }
-            } else {
-              config.click.bind(this)(data);
-            }
-        });
-      }
+          if (overlay && overlay.click) {
+            overlay.click.bind(this)(data);
+          }
+        } else {
+          config.click.bind(this)(data);
+        }
+      });
 
       if (config.overlays) {
         config.overlays.forEach(overlay => {
@@ -102,11 +110,12 @@ export class FsModelDirective implements AfterViewInit {
     }
   }
 
-  public connect(source, target, config: ConnectionConfig = {}) {
+  public connect(source: any, target: any, config: ConnectionConfig = {}) {
 
-    const sourceModel = this._modelObjects.get(source);
-    const targetModel = this._modelObjects.get(target);
+    const sourceModel: FsModelObjectDirective = this._modelObjects.get(source);
+    const targetModel: FsModelObjectDirective = this._modelObjects.get(target);
 
+    //Hack to wait for initing of directives. Must rewrite.
     if(!sourceModel || !targetModel) {
       this._queuedConnections.push({ source: source, target: target, config: config });
       return;
@@ -117,17 +126,45 @@ export class FsModelDirective implements AfterViewInit {
       target:  targetModel.element.nativeElement
     });
 
-    this.configConnection(connection, config);
+    this.applyConnectionConfig(connection, config);
   }
 
   public disconnect(connection) {
     this._jsPlumb.deleteConnection(connection);
   }
 
+  public getConnections(filter: { target?: any, source? :any }) {
+
+    const sourceModel = this._modelObjects.get(filter.source);
+    const targetModel = this._modelObjects.get(filter.target);
+
+    if(targetModel && sourceModel) {
+      return this._jsPlumb.getConnections({
+        source: sourceModel.element.nativeElement,
+        target: targetModel.element.nativeElement
+      });
+    }
+
+    if(sourceModel) {
+      return this._jsPlumb.getConnections({
+        source: sourceModel.element.nativeElement
+      });
+    }
+
+    if(targetModel) {
+      return this._jsPlumb.getConnections({
+        target: targetModel.element.nativeElement
+      });
+    }
+
+    return [];
+  }
+
   private addModelObject(directive: FsModelObjectDirective) {
     directive.init(this._jsPlumb, this);
     this._modelObjects.set(directive.data,directive);
 
+    //Hack to wait for initing of directives. Must rewrite.
     for (let i = this._queuedConnections.length - 1; i >= 0; --i) {
       const connection = this._queuedConnections[i];
       const sourceModel = this._modelObjects.get(connection.source);
@@ -144,13 +181,10 @@ export class FsModelDirective implements AfterViewInit {
 
     this._jsPlumb.getConnections({
       source: modelObject.element.nativeElement
-    }).forEach(connection => {
-      this._jsPlumb.deleteConnection(connection);
-    });
-
-    this._jsPlumb.getConnections({
+    }).concat(this._jsPlumb.getConnections({
       target: modelObject.element.nativeElement
-    }).forEach(connection => {
+    }))
+    .forEach(connection => {
       this._jsPlumb.deleteConnection(connection);
     });
 
@@ -160,9 +194,12 @@ export class FsModelDirective implements AfterViewInit {
   private init() {
 
     this._jsPlumb = jsPlumb.getInstance();
-
     this._jsPlumb.bind('connection',(info: any, e: Event) => {
-      this.connectionCreated.emit(Object.assign(info,{ event: e }));
+
+      const event = Object.assign(info,{  event: e,
+                                          targetModelObject: info.connection.target.fsModelObjectdirective,
+                                          sourceModelObject: info.connection.source.fsModelObjectdirective });
+      this.connectionCreated.emit(event);
     });
 
     this._jsPlumb.importDefaults(

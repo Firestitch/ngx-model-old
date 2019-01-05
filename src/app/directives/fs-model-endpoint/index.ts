@@ -1,0 +1,1 @@
+export * from './fs-model-endpoint.directive';

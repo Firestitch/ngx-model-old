@@ -1,6 +1,6 @@
 ::ng-deep {
 
-  .fs-model {
+  .fs-model, fsmodel {
     height: 600px;
     border: 1px solid #efefef;
     overflow: hidden;
@@ -16,7 +16,7 @@
     border-radius: 3px;
     font-size: 17px;
 
-    .fs-model-object-endpoint-source {
+    .fs-model-endpoint {
       background: #2196F3;
     }
 

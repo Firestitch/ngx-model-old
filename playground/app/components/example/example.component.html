@@ -8,16 +8,23 @@
   <div  *ngFor="let object of objects"
         class="object"
         fsModelObject
-        (dragStop)="dragStop($event)"
+        (dragStop)="objectDragStop($event)"
+        (dragStart)="objectDragStart($event)"
+        (click)="objectClick($event)"
         [data]="object"
         [x1]="object.x1"
         [y1]="object.y1"
         fsModelEndpointTarget>
     <button mat-icon-button (click)="remove(object)"><mat-icon>clear</mat-icon></button>
     <div>{{object.name}}</div>
-    <div fsModelObjectEndpointSource class="top"></div>
-    <div fsModelObjectEndpointSource class="left"></div>
-    <div fsModelObjectEndpointSource class="right"></div>
-    <div fsModelObjectEndpointSource class="bottom"></div>
+    <div fsModelEndpoint placement="north"></div>
+    <div fsModelEndpoint placement="east"></div>
+    <div fsModelEndpoint placement="west"></div>
+    <div fsModelEndpoint placement="south"></div>
+
+    <div fsModelEndpoint placement="north-east"></div>
+    <div fsModelEndpoint placement="north-west"></div>
+    <div fsModelEndpoint placement="south-east"></div>
+    <div fsModelEndpoint placement="south-west"></div>
   </div>
 </div>

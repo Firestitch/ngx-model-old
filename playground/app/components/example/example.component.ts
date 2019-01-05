@@ -4,6 +4,7 @@ import { random } from 'lodash';
 import { FsPrompt } from '@firestitch/prompt';
 import { of, Observable } from 'rxjs';
 import { ConnectionOverlayType } from 'src/app/helpers';
+import { p } from '@angular/core/src/render3';
 
 
 @Component({
@@ -11,7 +12,7 @@ import { ConnectionOverlayType } from 'src/app/helpers';
   templateUrl: 'example.component.html',
   styleUrls: ['example.component.scss']
 })
-export class ExampleComponent implements AfterViewInit {
+export class ExampleComponent implements AfterViewInit, OnInit {
 
   @ViewChild(FsModelDirective)
   public model: FsModelDirective;
@@ -21,7 +22,14 @@ export class ExampleComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
+    //this.load();
+  }
 
+  ngOnInit() {
+    this.load();
+  }
+
+  load() {
     for (let i = 0; i < 5; i++) {
       this.add();
     }
@@ -33,8 +41,8 @@ export class ExampleComponent implements AfterViewInit {
 
   add() {
 
-    const x1 = random(0, this.model.element.nativeElement.offsetWidth - 100 - 4);
-    const y1 = random(0, this.model.element.nativeElement.offsetHeight - 100 - 4);
+    const x1 = random(0, 1000);
+    const y1 = random(0, 500);
 
     const idx = this.objects.length;
 
@@ -55,7 +63,7 @@ export class ExampleComponent implements AfterViewInit {
               click: this.connectionLabelClick.bind(this)
             }
           ],
-          click: this.connectionLabelClick.bind(this),
+          //click: this.connectionLabelClick.bind(this),
           data: {
             object: object
           }
@@ -67,6 +75,7 @@ export class ExampleComponent implements AfterViewInit {
 
   public connectionCreated(e) {
     if(e.event) {
+      debugger;
       const config =  {
         overlays: [
           {
@@ -75,10 +84,10 @@ export class ExampleComponent implements AfterViewInit {
             click: this.connectionLabelClick.bind(this)
           }
         ],
-        click: this.connectionLabelClick.bind(this)
+        //click: this.connectionLabelClick.bind(this)
       };
 
-      this.model.configConnection(e.connection,config);
+      this.model.applyConnectionConfig(e.connection,config);
     }
   }
 
@@ -87,12 +96,26 @@ export class ExampleComponent implements AfterViewInit {
       title: 'Confirm',
       template: 'Would you like to delete this connection?'
     }).subscribe(() => {
-      this.model.disconnect(e.connection);
+      const connection = this.model.getConnections({ source: e.connection.source.fsModelObjectdirective.data, target: e.connection.target.fsModelObjectdirective.data })[0];
+
+      //this.model.disconnect(e.connection);
+      this.model.disconnect(connection);
 
     });
   }
 
-  dragStop(e) {
-    console.log('dragStop',e);
+  objectDragStart(e) {
+    e.e.stopPropagation();
+    console.log('objectDragStart',e);
+  }
+
+  objectDragStop(e) {
+    console.log('objectDragStop',e);
+  }
+
+  objectClick(e: Event) {
+    if (!e.defaultPrevented) {
+      console.log('objectClick',e);
+    }
   }
 }

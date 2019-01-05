@@ -10,37 +10,51 @@
   z-index: 8;
   user-select: text;
 
-  .fs-model-object-endpoint-source {
+  .fs-model-endpoint {
     position: absolute;
     width: 10px;
     height: 10px;
     background: #cfcfcf;
     border-radius: 50%;
     display: none;
-    cursor: grab;
+    cursor: pointer;
 
-    &.top {
-      left: calc(50% - 7px);
+    &.north,
+    &.north-east,
+    &.north-west {
       top: -7px;
     }
 
-    &.bottom {
+    &.east,
+    &.west {
+      bottom: calc(50% - 7px);
+    }
+
+    &.north,
+    &.south {
       left: calc(50% - 7px);
-      bottom: -7px;
     }
 
-    &.right {
+    &.east,
+    &.north-east,
+    &.south-east {
       right: -7px;
-      bottom: calc(50% - 7px);
     }
 
-    &.left {
+    &.west,
+    &.north-west,
+    &.south-west {
       left: -7px;
-      bottom: calc(50% - 7px);
+    }
+
+    &.south,
+    &.south-east,
+    &.south-west {
+      bottom: -7px;
     }
   }
 
-  &:hover:not(.jtk-drag):not(.jtk-drag-hover) .fs-model-object-endpoint-source {
+  &:hover:not(.jtk-drag):not(.jtk-drag-hover) .fs-model-endpoint {
     display: block;
   }
 
