@@ -4,6 +4,7 @@ import { FsModelObjectDirective } from '../fs-model-object/fs-model-object.direc
 import { guid } from '@firestitch/common/util';
 import { filter } from 'lodash';
 import { ConnectionConfig } from '../../interfaces';
+import { ConnectionOverlayType } from '../../helpers';
 
 
 @Directive({
@@ -87,8 +88,24 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
         }
       });
 
+      // connection.bind('mouseover', function(conn) {
+      //   filter(config.overlays,{ type: ConnectionOverlayType.Tooltip }).forEach(overlay => {
+      //     if (conn.hasOwnProperty('component')) {
+      //       conn = conn.component
+      //     }
+
+      //   });
+      // });
+
+      // connection.bind('mouseout', function(conn) {
+      //  // conn.removeOverlay('connection-tooltip');
+      // });
+
       if (config.overlays) {
-        config.overlays.forEach(overlay => {
+        const tooltip = filter(config.overlays,{ type: ConnectionOverlayType.Tooltip })[0];
+
+        filter(config.overlays,{ type: ConnectionOverlayType.Label })
+        .forEach(overlay => {
 
           if (!overlay.id) {
             overlay.id = guid();
@@ -99,9 +116,15 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
             cssClass += ' fs-model-clickable';
           }
 
+          let label = overlay.label;
+
+          if (tooltip) {
+            label += '<div class="fs-model-connection-tooltip">' + tooltip.label + '</div>';
+          }
+
           connection.addOverlay(['Label',
           {
-            label: overlay.label,
+            label: label,
             cssClass: cssClass,
             id: overlay.id
           }]);

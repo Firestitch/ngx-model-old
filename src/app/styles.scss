@@ -77,3 +77,27 @@
 .fs-model-connection-label.fs-model-clickable {
   cursor: pointer;
 }
+
+.fs-model-connection-tooltip {
+    transform-origin: center top 0px;
+    transform: scale(1);
+    color: #fff;
+    border-radius: 4px;
+    max-width: 250px;
+    padding: 6px 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: rgba(97,97,97,.9);
+    font-size: 10px;
+    display: none;
+    position: absolute;
+    margin-top: 3px;
+    top: 100%;
+    white-space: pre;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.fs-model-connection-label:hover .fs-model-connection-tooltip {
+  display: block;
+}

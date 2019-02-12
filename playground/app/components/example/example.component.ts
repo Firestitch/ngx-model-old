@@ -61,9 +61,12 @@ export class ExampleComponent implements AfterViewInit, OnInit {
               type: ConnectionOverlayType.Label,
               label: 'Label ' + idx,
               click: this.connectionLabelClick.bind(this)
+            },
+            {
+              type: ConnectionOverlayType.Tooltip,
+              label: 'Tooltip that spans\nmultiple lines and support <br><b>HTML</b>'
             }
           ],
-          //click: this.connectionLabelClick.bind(this),
           data: {
             object: object
           }

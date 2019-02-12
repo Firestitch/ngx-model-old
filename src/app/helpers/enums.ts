@@ -1,3 +1,4 @@
 export enum ConnectionOverlayType {
-  Label = 'Label'
+  Label = 'Label',
+  Tooltip = 'Tooltip'
 }
