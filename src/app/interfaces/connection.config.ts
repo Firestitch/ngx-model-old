@@ -1,15 +1,15 @@
-import { ConnectionOverlayType } from "../helpers";
+import { ConnectionOverlayType } from '../helpers';
 
 
 export class ConnectionConfig {
-  overlays?: ConnectionOverlayConfig[]
-  click?: Function
-  data?: any
+  overlays?: ConnectionOverlayConfig[];
+  click?: Function;
+  data?: any;
 }
 
 export class ConnectionOverlayConfig {
-  id?: string
-  type: ConnectionOverlayType
-  label?: string
+  id?: string;
+  type: ConnectionOverlayType;
+  label?: string;
   click?: Function
 }

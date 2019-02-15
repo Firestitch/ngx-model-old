@@ -1,4 +1,4 @@
-import { NgModule, ModuleWithProviders } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { FsModelDirective } from './directives/fs-model/fs-model.directive';
@@ -7,25 +7,24 @@ import { FsModelEndpointDirective } from './directives/fs-model-endpoint/fs-mode
 
 @NgModule({
   imports: [
-    CommonModule
+    CommonModule,
   ],
   exports: [
     FsModelDirective,
     FsModelObjectDirective,
-    FsModelEndpointDirective
+    FsModelEndpointDirective,
   ],
-  entryComponents: [
-  ],
+  entryComponents: [],
   declarations: [
     FsModelDirective,
     FsModelObjectDirective,
-    FsModelEndpointDirective
+    FsModelEndpointDirective,
   ]
 })
 export class FsModelModule {
-  static forRoot(): ModuleWithProviders {
+  /*static forRoot(): ModuleWithProviders {
     return {
       ngModule: FsModelModule
     };
-  }
+  }*/
 }

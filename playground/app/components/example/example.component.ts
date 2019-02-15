@@ -1,10 +1,7 @@
-import { Component, AfterViewInit, ViewChild, OnInit } from '@angular/core';
-import { FsModelDirective } from 'src/app/directives/fs-model';
-import { random } from 'lodash';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FsPrompt } from '@firestitch/prompt';
-import { of, Observable } from 'rxjs';
-import { ConnectionOverlayType } from 'src/app/helpers';
-import { p } from '@angular/core/src/render3';
+import { ConnectionOverlayType, FsModelDirective } from '@firestitch/model';
+import { random } from 'lodash-es';
 
 
 @Component({
@@ -22,7 +19,7 @@ export class ExampleComponent implements AfterViewInit, OnInit {
   }
 
   ngAfterViewInit() {
-    //this.load();
+    // this.load();
   }
 
   ngOnInit() {
@@ -50,26 +47,26 @@ export class ExampleComponent implements AfterViewInit, OnInit {
 
     this.objects.push(object);
 
-    if(idx) {
+    if (idx) {
 
       const object1 = this.objects[idx - 1];
       const object2 = this.objects[idx];
 
-      let config = {
-          overlays: [
-            {
-              type: ConnectionOverlayType.Label,
-              label: 'Label ' + idx,
-              click: this.connectionLabelClick.bind(this)
-            },
-            {
-              type: ConnectionOverlayType.Tooltip,
-              label: 'Tooltip that spans\nmultiple lines and support <br><b>HTML</b>'
-            }
-          ],
-          data: {
-            object: object
+      const config = {
+        overlays: [
+          {
+            type: ConnectionOverlayType.Label,
+            label: 'Label ' + idx,
+            click: this.connectionLabelClick.bind(this)
+          },
+          {
+            type: ConnectionOverlayType.Tooltip,
+            label: 'Tooltip that spans\nmultiple lines and support <br><b>HTML</b>'
           }
+        ],
+        data: {
+          object: object
+        }
       };
 
       this.model.connect(object1, object2, config);
@@ -77,9 +74,9 @@ export class ExampleComponent implements AfterViewInit, OnInit {
   }
 
   public connectionCreated(e) {
-    if(e.event) {
+    if (e.event) {
       debugger;
-      const config =  {
+      const config = {
         overlays: [
           {
             type: ConnectionOverlayType.Label,
@@ -87,10 +84,10 @@ export class ExampleComponent implements AfterViewInit, OnInit {
             click: this.connectionLabelClick.bind(this)
           }
         ],
-        //click: this.connectionLabelClick.bind(this)
+        // click: this.connectionLabelClick.bind(this)
       };
 
-      this.model.applyConnectionConfig(e.connection,config);
+      this.model.applyConnectionConfig(e.connection, config);
     }
   }
 
@@ -99,9 +96,12 @@ export class ExampleComponent implements AfterViewInit, OnInit {
       title: 'Confirm',
       template: 'Would you like to delete this connection?'
     }).subscribe(() => {
-      const connection = this.model.getConnections({ source: e.connection.source.fsModelObjectdirective.data, target: e.connection.target.fsModelObjectdirective.data })[0];
+      const connection = this.model.getConnections({
+        source: e.connection.source.fsModelObjectdirective.data,
+        target: e.connection.target.fsModelObjectdirective.data
+      })[0];
 
-      //this.model.disconnect(e.connection);
+      // this.model.disconnect(e.connection);
       this.model.disconnect(connection);
 
     });
@@ -109,16 +109,16 @@ export class ExampleComponent implements AfterViewInit, OnInit {
 
   objectDragStart(e) {
     e.e.stopPropagation();
-    console.log('objectDragStart',e);
+    console.log('objectDragStart', e);
   }
 
   objectDragStop(e) {
-    console.log('objectDragStop',e);
+    console.log('objectDragStop', e);
   }
 
   objectClick(e: Event) {
     if (!e.defaultPrevented) {
-      console.log('objectClick',e);
+      console.log('objectClick', e);
     }
   }
 }

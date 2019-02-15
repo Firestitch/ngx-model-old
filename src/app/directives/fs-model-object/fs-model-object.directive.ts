@@ -1,5 +1,12 @@
-import { ElementRef, Directive, Output, Input, HostBinding, HostListener, Renderer2 } from '@angular/core';
-import { EventEmitter } from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  EventEmitter,
+  HostBinding,
+  HostListener,
+  Input,
+  Output
+} from '@angular/core';
 import { FsModelDirective } from '../fs-model/fs-model.directive';
 
 
@@ -24,7 +31,7 @@ export class FsModelObjectDirective {
     const xDelta = Math.abs(this._mouseDownEvent.screenX - this._mouseUpEvent.screenX);
     const yDelta = Math.abs(this._mouseDownEvent.screenY - this._mouseUpEvent.screenY);
 
-    if (xDelta>1 || yDelta>1) {
+    if (xDelta > 1 || yDelta > 1) {
       e.preventDefault();
       e.stopPropagation();
     }
@@ -53,7 +60,8 @@ export class FsModelObjectDirective {
     this.y1 = value;
   }
 
-  constructor(private _element: ElementRef) {}
+  constructor(private _element: ElementRef) {
+  }
 
   get element(): ElementRef {
     return this._element;
@@ -61,24 +69,24 @@ export class FsModelObjectDirective {
 
   init(jsPlumb, fsModelDirective: FsModelDirective) {
 
-    if(this._jsPlumb) {
+    if (this._jsPlumb) {
       return;
     }
 
     this.element.nativeElement.fsModelObjectdirective = this;
     this._jsPlumb = jsPlumb;
     this._jsPlumb.draggable([this.element.nativeElement],
-    {
-      start: (e) => {
-        this.dragStart.emit(e);
-        this._jsPlumb.setZoom(this.scale);
-      },
-      stop: e => {
-        let x1 = e.pos[0];
-        let y1 = e.pos[1];
-        this.dragStop.emit({ event: e, data: this.data, x1: x1, y1: y1 });
-      }
-    });
+      {
+        start: (e) => {
+          this.dragStart.emit(e);
+          this._jsPlumb.setZoom(this.scale);
+        },
+        stop: e => {
+          const x1 = e.pos[0];
+          const y1 = e.pos[1];
+          this.dragStop.emit({ event: e, data: this.data, x1: x1, y1: y1 });
+        }
+      });
 
     this._jsPlumb.makeSource(this.element.nativeElement, {
       filter: '.fs-model-endpoint'

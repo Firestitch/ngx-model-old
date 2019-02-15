@@ -11,7 +11,7 @@ export class FsModelEndpointDirective implements OnInit {
   @HostBinding('class') class: string;
 
   ngOnInit() {
-    this.class = 'fs-model-endpoint '+ this.placement;
+    this.class = 'fs-model-endpoint ' + this.placement;
   }
 
 }
