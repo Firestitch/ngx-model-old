@@ -1,5 +1,5 @@
 /*
- * Public API Surface of fs-menu
+ * Public API
  */
 
 export { FsModelModule } from './app/fs-model.module';
