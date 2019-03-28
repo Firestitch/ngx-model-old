@@ -8,7 +8,8 @@ import {
   OnDestroy,
   OnInit,
   Output,
-  QueryList
+  QueryList,
+  Input
 } from '@angular/core';
 
 import { guid } from '@firestitch/common';
@@ -16,12 +17,13 @@ import { guid } from '@firestitch/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { jsPlumb } from 'jsplumb';
 import { filter } from 'lodash-es';
 
 import { FsModelObjectDirective } from '../fs-model-object/fs-model-object.directive';
 import { ConnectionConfig } from '../../interfaces';
 import { ConnectionOverlayType } from '../../helpers';
+import { ModelConfig } from '../../interfaces/model-config';
+declare var jsPlumb: any; // for AOT compilation
 
 
 @Directive({
@@ -32,6 +34,12 @@ import { ConnectionOverlayType } from '../../helpers';
 })
 export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
 
+  public config: ModelConfig = {};
+
+  @Input('config') set setConfig(value) {
+    this.initConfig(value);
+  }
+
   @Output() connectionCreated = new EventEmitter();
   @ContentChildren(FsModelObjectDirective) fsModelObjects: QueryList<FsModelObjectDirective>;
 
@@ -40,9 +48,14 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
   private _jsPlumb = null;
   private _modelObjects = new Map<any, FsModelObjectDirective>();
   private _destroy$ = new Subject<void>();
+  private defaultOverlay = { length: 10, width: 10, foldback: 1 };
 
   constructor(private _element: ElementRef, private differs: IterableDiffers) {
     this._differ = this.differs.find([]).create(null);
+    this.initConfig({});
+  }
+
+  ngOnInit() {
     this.init();
   }
 
@@ -50,7 +63,16 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
     return this._element;
   }
 
-  ngOnInit() {
+  initConfig(config) {
+
+    this.config = config || {};
+    this.config.paintStyle = this.config.paintStyle || {};
+    this.config.hoverPaintStyle = this.config.hoverPaintStyle || {};
+
+    this.config.paintStyle.stroke = this.config.paintStyle.stroke || '#2196f3';
+    this.config.paintStyle.strokeWidth = this.config.paintStyle.strokeWidth || 2;
+    this.config.hoverPaintStyle.stroke = this.config.hoverPaintStyle.stroke || '#ccc';
+    this.config.hoverPaintStyle.strokeWidth = this.config.hoverPaintStyle.strokeWidth || 2;
   }
 
   ngAfterViewInit() {
@@ -88,8 +110,16 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
   }
 
   public applyConnectionConfig(connection, config: ConnectionConfig = {}) {
-    connection.setData({ data: config.data });
 
+    if (config.defaultOverlays === false) {
+      connection.removeAllOverlays();
+    }
+
+    if (config.connector) {
+      connection.setConnector(config.connector);
+    }
+
+    connection.setData({ data: config.data });
     connection.addClass('fs-model-connection');
 
     if (config) {
@@ -114,21 +144,7 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
         }
       });
 
-      // connection.bind('mouseover', function(conn) {
-      //   filter(config.overlays,{ type: ConnectionOverlayType.Tooltip }).forEach(overlay => {
-      //     if (conn.hasOwnProperty('component')) {
-      //       conn = conn.component
-      //     }
-
-      //   });
-      // });
-
-      // connection.bind('mouseout', function(conn) {
-      //  // conn.removeOverlay('connection-tooltip');
-      // });
-
       if (config.overlays) {
-        const tooltip = filter(config.overlays, { type: ConnectionOverlayType.Tooltip })[0];
 
         filter(config.overlays, { type: ConnectionOverlayType.Label })
           .forEach(overlay => {
@@ -144,16 +160,33 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
 
             let label = overlay.label;
 
-            if (tooltip) {
-              label += '<div class="fs-model-connection-tooltip">' + tooltip.label + '</div>';
+            if (overlay.tooltip) {
+              label += '<div class="fs-model-connection-tooltip">' + overlay.tooltip + '</div>';
             }
 
-            connection.addOverlay(['Label',
+            connection.addOverlay([overlay.type,
               {
                 label: label,
                 cssClass: cssClass,
-                id: overlay.id
+                id: overlay.id,
+                location: overlay.location
               }]);
+          });
+
+          filter(config.overlays, { type: ConnectionOverlayType.Arrow })
+          .forEach(overlay => {
+
+            overlay = Object.assign(
+              {},
+              this.defaultOverlay,
+              {
+                id: overlay.id,
+                location: overlay.location,
+                direction: overlay.direction
+              },
+              overlay);
+
+            connection.addOverlay([overlay.type, overlay]);
           });
       }
     }
@@ -245,48 +278,61 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
     this._jsPlumb = jsPlumb.getInstance();
     this._jsPlumb.bind('connection', (info: any, e: Event) => {
 
-      const event = Object.assign(info, {
-        event: e,
-        targetModelObject: info.connection.target.fsModelObjectdirective,
-        sourceModelObject: info.connection.source.fsModelObjectdirective
-      });
-      this.connectionCreated.emit(event);
+      if (e && e.defaultPrevented) {
+        return;
+      }
+
+      if (info.connection.target && info.connection.source) {
+        const target = info.connection.target.fsModelObjectDirective;
+        const source = info.connection.source.fsModelObjectDirective;
+
+        const event = Object.assign(info, {
+          event: e,
+          targetModelObject: target,
+          sourceModelObject: source
+        });
+
+        this.connectionCreated.emit(event);
+      }
     });
 
     this._jsPlumb.importDefaults(
       {
         ConnectionsDetachable: false,
         Anchor: 'Continuous',
-        EndpointStyle: { fill: 'transparent', stroke: 'transparent' },
+        EndpointStyle: {
+          fill: 'transparent',
+          stroke: 'transparent'
+        },
         PaintStyle: {
-          stroke: '#2196f3',
-          strokeWidth: 2,
+          stroke: this.config.paintStyle.stroke,
+          strokeWidth: this.config.paintStyle.strokeWidth,
           outlineStroke: 'transparent',
-          outlineWidth: 0
+          outlineWidth: 0,
+          dashstyle : '0'
         },
         HoverPaintStyle: {
-          stroke: '#2196f3',
-          strokeWidth: 4,
-          outlineStroke: 'transparent',
-          outlineWidth: 0
+          stroke: this.config.hoverPaintStyle.stroke,
+          strokeWidth: this.config.hoverPaintStyle.strokeWidth
         },
         Connector: [
           'Flowchart',
           {
-            stub: [40, 60],
+            stub: [60, 60],
             gap: 1,
             cornerRadius: 5,
             alwaysRespectStubs: true
           }
         ],
         Overlays: [
-          ['Arrow', {
-            location: 1,
-            id: 'arrow',
-            length: 10,
-            width: 10,
-            foldback: 1
-          }]
+          [ConnectionOverlayType.Arrow,
+            Object.assign(
+              this.defaultOverlay,
+              {
+                  id: 'arrow',
+                  location: 1
+              })
+            ]
         ]
       });
   }

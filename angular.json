@@ -25,7 +25,9 @@
             "styles": [
               "playground/styles.scss"
             ],
-            "scripts": []
+            "scripts": [
+              "src/app/assets/jsplumb.js"
+            ]
           },
           "configurations": {
             "production": {

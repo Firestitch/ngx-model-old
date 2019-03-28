@@ -2,6 +2,9 @@ import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FsPrompt } from '@firestitch/prompt';
 import { ConnectionOverlayType, FsModelDirective } from '@firestitch/model';
 import { random } from 'lodash-es';
+import { ConnectionConfig } from 'src/app/interfaces';
+import { ConnectionConnector } from 'src/app/helpers';
+import { ModelConfig } from 'package/public_api';
 
 
 @Component({
@@ -14,6 +17,8 @@ export class ExampleComponent implements AfterViewInit, OnInit {
   @ViewChild(FsModelDirective)
   public model: FsModelDirective;
   public objects = [];
+  public startObject = {};
+  public modelConfig: ModelConfig = {};
 
   constructor(private fsPrompt: FsPrompt) {
   }
@@ -23,6 +28,8 @@ export class ExampleComponent implements AfterViewInit, OnInit {
   }
 
   ngOnInit() {
+    this.modelConfig = { paintStyle: { stroke: '' }}
+
     this.load();
   }
 
@@ -47,6 +54,10 @@ export class ExampleComponent implements AfterViewInit, OnInit {
 
     this.objects.push(object);
 
+    if (this.objects.length === 1) {
+      this.model.connect(this.startObject, object);
+    }
+
     if (idx) {
 
       const object1 = this.objects[idx - 1];
@@ -57,11 +68,8 @@ export class ExampleComponent implements AfterViewInit, OnInit {
           {
             type: ConnectionOverlayType.Label,
             label: 'Label ' + idx,
+            tooltip: 'Tooltip that spans\nmultiple lines and support <br><b>HTML</b>',
             click: this.connectionLabelClick.bind(this)
-          },
-          {
-            type: ConnectionOverlayType.Tooltip,
-            label: 'Tooltip that spans\nmultiple lines and support <br><b>HTML</b>'
           }
         ],
         data: {
@@ -73,19 +81,47 @@ export class ExampleComponent implements AfterViewInit, OnInit {
     }
   }
 
+  public addExternal(object) {
+    const config: ConnectionConfig = {
+      overlays: [
+        {
+          type: ConnectionOverlayType.Arrow,
+          location: .4,
+          direction: 1
+        },
+        {
+          type: ConnectionOverlayType.Label,
+          label: 'google.com'
+        }
+      ],
+      defaultOverlays: false,
+      click: this.connectionLabelClick.bind(this)
+    };
+
+    this.model.connect(object, object, config);
+  }
+
   public connectionCreated(e) {
+
+    console.log('connectionCreated', e);
+
     if (e.event) {
-      debugger;
-      const config = {
+
+      const config: ConnectionConfig = {
         overlays: [
           {
             type: ConnectionOverlayType.Label,
-            label: '<b>New Connection Label</b>',
+            label: 'New Connection Label',
+            tooltip: 'New Connection Tooltip',
             click: this.connectionLabelClick.bind(this)
           }
         ],
         // click: this.connectionLabelClick.bind(this)
       };
+
+      if (e.source === e.target) {
+        config.connector = ConnectionConnector.StateMachine;
+      }
 
       this.model.applyConnectionConfig(e.connection, config);
     }
@@ -101,9 +137,7 @@ export class ExampleComponent implements AfterViewInit, OnInit {
         target: e.connection.target.fsModelObjectdirective.data
       })[0];
 
-      // this.model.disconnect(e.connection);
       this.model.disconnect(connection);
-
     });
   }
 

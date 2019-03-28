@@ -1,1 +1,1 @@
-export * from './connection.config';
+export * from './connection-config';

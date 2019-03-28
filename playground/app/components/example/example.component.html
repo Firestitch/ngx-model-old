@@ -2,9 +2,20 @@
   <button mat-icon-button (click)="add()"><mat-icon>add</mat-icon></button>
 </div>
 
-<div  fsModel
-      #model
-      (connectionCreated)="connectionCreated($event)">
+<div
+  fsModel
+  #model
+  [config]="modelConfig"
+  (connectionCreated)="connectionCreated($event)">
+
+  <div fsModelObject
+    class="start-object"
+    x1="60"
+    y1="60"
+    [data]="startObject"
+    [draggable]="false">
+  </div>
+
   <div  *ngFor="let object of objects"
         class="object"
         fsModelObject
@@ -14,8 +25,12 @@
         [data]="object"
         [x1]="object.x1"
         [y1]="object.y1"
-        fsModelEndpointTarget>
-    <button mat-icon-button (click)="remove(object)"><mat-icon>clear</mat-icon></button>
+        maxSourceConnections="2"
+        fsModelTarget>
+        <div class="buttons">
+          <button mat-icon-button (click)="addExternal(object)"><mat-icon>link</mat-icon></button>
+          <button mat-icon-button (click)="remove(object)"><mat-icon>delete</mat-icon></button>
+        </div>
     <div>{{object.name}}</div>
     <div fsModelEndpoint placement="north"></div>
     <div fsModelEndpoint placement="east"></div>
