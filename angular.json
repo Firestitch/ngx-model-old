@@ -24,9 +24,6 @@
             ],
             "styles": [
               "playground/styles.scss"
-            ],
-            "scripts": [
-              "src/app/assets/jsplumb.js"
             ]
           },
           "configurations": {

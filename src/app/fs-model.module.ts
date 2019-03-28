@@ -6,6 +6,7 @@ import { FsModelObjectDirective } from './directives/fs-model-object/fs-model-ob
 import { FsModelEndpointDirective } from './directives/fs-model-endpoint/fs-model-endpoint.directive';
 import { FsModelTargetDirective } from './directives/fs-model-target/fs-model-target.directive';
 
+
 @NgModule({
   imports: [
     CommonModule,

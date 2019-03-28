@@ -23,7 +23,7 @@ import { FsModelObjectDirective } from '../fs-model-object/fs-model-object.direc
 import { ConnectionConfig } from '../../interfaces';
 import { ConnectionOverlayType } from '../../helpers';
 import { ModelConfig } from '../../interfaces/model-config';
-declare var jsPlumb: any; // for AOT compilation
+import { jsPlumb } from '@firestitch/jsplumb';
 
 
 @Directive({
