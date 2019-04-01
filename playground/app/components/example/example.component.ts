@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FsPrompt } from '@firestitch/prompt';
 import { ConnectionOverlayType, FsModelDirective } from '@firestitch/model';
-import { random } from 'lodash-es';
+import { random, values, filter } from 'lodash-es';
 import { ConnectionConfig } from 'src/app/interfaces';
 import { ConnectionConnector } from 'src/app/helpers';
 import { ModelConfig } from 'package/public_api';
@@ -16,6 +16,7 @@ export class ExampleComponent implements AfterViewInit, OnInit {
 
   @ViewChild(FsModelDirective)
   public model: FsModelDirective;
+
   public objects = [];
   public startObject = {};
   public modelConfig: ModelConfig = {};
@@ -139,6 +140,10 @@ export class ExampleComponent implements AfterViewInit, OnInit {
 
       this.model.disconnect(connection);
     });
+
+    // filter(values(e.connection.getOverlays()),{ type: 'Label' }).forEach(overlay => {
+    //   overlay.setLabel('asdasd');
+    // });
   }
 
   objectDragStart(e) {

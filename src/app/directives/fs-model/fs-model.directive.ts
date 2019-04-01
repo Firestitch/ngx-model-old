@@ -21,7 +21,7 @@ import { filter } from 'lodash-es';
 
 import { FsModelObjectDirective } from '../fs-model-object/fs-model-object.directive';
 import { ConnectionConfig } from '../../interfaces';
-import { ConnectionOverlayType } from '../../helpers';
+import { ConnectionOverlayType, ConnectionConnector } from '../../helpers';
 import { ModelConfig } from '../../interfaces/model-config';
 import { jsPlumb } from '@firestitch/jsplumb';
 
@@ -63,6 +63,10 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
     return this._element;
   }
 
+  get jsPlumb() {
+    return this._jsPlumb;
+  }
+
   initConfig(config) {
 
     this.config = config || {};
@@ -101,12 +105,6 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
         });
       }
     });
-  }
-
-  ngOnDestroy() {
-    this._jsPlumb.reset();
-    this._destroy$.next();
-    this._destroy$.complete();
   }
 
   public applyConnectionConfig(connection, config: ConnectionConfig = {}) {
@@ -316,7 +314,7 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
           strokeWidth: this.config.hoverPaintStyle.strokeWidth
         },
         Connector: [
-          'Flowchart',
+          ConnectionConnector.Flowchart,
           {
             stub: [60, 60],
             gap: 1,
@@ -335,5 +333,11 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
             ]
         ]
       });
+  }
+
+  ngOnDestroy() {
+    this._jsPlumb.reset();
+    this._destroy$.next();
+    this._destroy$.complete();
   }
 }

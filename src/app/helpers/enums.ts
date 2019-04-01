@@ -5,5 +5,8 @@ export enum ConnectionOverlayType {
 }
 
 export enum ConnectionConnector {
-  StateMachine = 'StateMachine'
+  StateMachine = 'StateMachine',
+  Flowchart = 'Flowchart',
+  Bezier = 'Bezier',
+  Straight = 'Straight'
 }

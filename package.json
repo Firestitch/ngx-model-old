@@ -2,7 +2,7 @@
   "name": "@firestitch/model",
   "title": "Model",
   "description": "@firestitch/model",
-  "version": "7.2.0",
+  "version": "7.2.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/Firestitch/ngx-model"
