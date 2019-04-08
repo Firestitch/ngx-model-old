@@ -1,10 +1,9 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FsPrompt } from '@firestitch/prompt';
-import { ConnectionOverlayType, FsModelDirective } from '@firestitch/model';
-import { random, values, filter } from 'lodash-es';
+import { ConnectionOverlayType, FsModelDirective, ModelConfig } from '@firestitch/model';
+import { random } from 'lodash-es';
 import { ConnectionConfig } from 'src/app/interfaces';
 import { ConnectionConnector } from 'src/app/helpers';
-import { ModelConfig } from 'package/public_api';
 
 
 @Component({
