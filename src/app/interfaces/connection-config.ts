@@ -7,5 +7,7 @@ export interface ConnectionConfig {
   click?: Function;
   data?: any;
   defaultOverlays?: boolean,
-  connector?: ConnectionConnector
+  connector?: ConnectionConnector,
+  tooltip?: string,
+  name?: string
 }

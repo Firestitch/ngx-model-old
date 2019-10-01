@@ -29,7 +29,6 @@ export class ExampleComponent implements AfterViewInit, OnInit {
 
   ngOnInit() {
     this.modelConfig = { paintStyle: { stroke: '' }}
-
     this.load();
   }
 
@@ -74,10 +73,20 @@ export class ExampleComponent implements AfterViewInit, OnInit {
         ],
         data: {
           object: object
-        }
+        },
+        tooltip: 'Connection tooltip',
+        click: this.connectionLabelClick.bind(this),
+        name: 'bob'
       };
 
       this.model.connect(object1, object2, config);
+    }
+  }
+
+  public repaint(object) {
+    const directive = this.model.getModelObjectDirective(object);
+    if (directive) {
+      directive.repaint();
     }
   }
 
@@ -115,8 +124,7 @@ export class ExampleComponent implements AfterViewInit, OnInit {
             tooltip: 'New Connection Tooltip',
             click: this.connectionLabelClick.bind(this)
           }
-        ],
-        // click: this.connectionLabelClick.bind(this)
+        ]
       };
 
       if (e.source === e.target) {
@@ -132,12 +140,8 @@ export class ExampleComponent implements AfterViewInit, OnInit {
       title: 'Confirm',
       template: 'Would you like to delete this connection?'
     }).subscribe(() => {
-      const connection = this.model.getConnections({
-        source: e.connection.source.fsModelObjectdirective.data,
-        target: e.connection.target.fsModelObjectdirective.data
-      })[0];
 
-      this.model.disconnect(connection);
+      this.model.disconnect(e.connection);
     });
 
     // filter(values(e.connection.getOverlays()),{ type: 'Label' }).forEach(overlay => {

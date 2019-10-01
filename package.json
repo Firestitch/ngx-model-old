@@ -2,7 +2,7 @@
   "name": "@firestitch/model",
   "title": "Model",
   "description": "@firestitch/model",
-  "version": "7.2.1",
+  "version": "7.3.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/Firestitch/ngx-model"
@@ -49,6 +49,7 @@
     "@firestitch/message": "^0.2.0",
     "@firestitch/prompt": "^0.2.0",
     "@firestitch/common": "^7.0.0",
+    "@firestitch/menu": "^7.0.10",
     "lodash-es": "^4.17.11",
     "codelyzer": "^4.5.0",
     "cpx": "^1.5.0",
@@ -64,7 +65,7 @@
     "webpack-dev-server": "^3.1.14",
     "zone.js": "^0.8.29",
     "tslint": "^5.12.1",
-    "@firestitch/jsplumb": "^2.9.1"
+    "@firestitch/jsplumb": "^2.12.0"
   },
   "engines": {
     "node": ">=6.0.0"
@@ -72,6 +73,6 @@
   "peerDependencies": {
     "@firestitch/common": ">=7.0.0",
     "lodash-es": ">=4.17.11",
-    "@firestitch/jsplumb": ">=2.9.1"
+    "@firestitch/jsplumb": ">=2.12.0"
   }
 }

@@ -16,21 +16,32 @@
     [draggable]="false">
   </div>
 
-  <div  *ngFor="let object of objects"
-        class="object"
-        fsModelObject
-        (dragStop)="objectDragStop($event)"
-        (dragStart)="objectDragStart($event)"
-        (click)="objectClick($event)"
-        [data]="object"
-        [x1]="object.x1"
-        [y1]="object.y1"
-        maxSourceConnections="2"
-        fsModelTarget>
-        <div class="buttons">
-          <button mat-icon-button (click)="addExternal(object)"><mat-icon>link</mat-icon></button>
-          <button mat-icon-button (click)="remove(object)"><mat-icon>delete</mat-icon></button>
-        </div>
+  <div
+    *ngFor="let object of objects"
+    class="object"
+    fsModelObject
+    (dragStop)="objectDragStop($event)"
+    (dragStart)="objectDragStart($event)"
+    (click)="objectClick($event)"
+    [data]="object"
+    [x1]="object.x1"
+    [y1]="object.y1"
+    maxSourceConnections="2"
+    fsModelTarget>
+    <div class="buttons">
+      <fs-menu class="simple-menu">
+        <ng-template fs-menu-item
+                      (click)="addExternal(object)">
+          Add External Link
+        </ng-template>
+        <ng-template fs-menu-item (click)="remove(object)">
+          Delete
+        </ng-template>
+        <ng-template fs-menu-item (click)="repaint(object)">
+          Repaint
+        </ng-template>
+      </fs-menu>
+    </div>
     <div>{{object.name}}</div>
     <div fsModelEndpoint placement="north"></div>
     <div fsModelEndpoint placement="east"></div>

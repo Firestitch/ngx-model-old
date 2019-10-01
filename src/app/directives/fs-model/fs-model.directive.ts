@@ -9,12 +9,13 @@ import {
   OnInit,
   Output,
   QueryList,
-  Input
+  Input,
+  HostBinding
 } from '@angular/core';
 
 import { guid } from '@firestitch/common';
 
-import { Subject } from 'rxjs';
+import { Subject, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { filter } from 'lodash-es';
@@ -27,14 +28,13 @@ import { jsPlumb } from '@firestitch/jsplumb';
 
 
 @Directive({
-  selector: '[fsModel]',
-  host: {
-    class: 'fs-model'
-  }
+  selector: '[fsModel]'
 })
 export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
 
   public config: ModelConfig = {};
+
+  @HostBinding('class.fs-model') classFsModel = true;
 
   @Input('config') set setConfig(value) {
     this.initConfig(value);
@@ -56,7 +56,7 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.init();
+    this._init();
   }
 
   get element(): ElementRef {
@@ -79,12 +79,18 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
     this.config.hoverPaintStyle.strokeWidth = this.config.hoverPaintStyle.strokeWidth || 2;
   }
 
+  ngOnDestroy() {
+    this._jsPlumb.reset();
+    this._destroy$.next();
+    this._destroy$.complete();
+  }
+
   ngAfterViewInit() {
 
     let changeDiff = this._differ.diff(this.fsModelObjects);
     if (changeDiff) {
       changeDiff.forEachAddedItem(change => {
-        this.addModelObject(change.item);
+        this._addModelObject(change.item);
       });
     }
 
@@ -94,17 +100,17 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
       )
       .subscribe(fsModelObjects => {
 
-      changeDiff = this._differ.diff(fsModelObjects);
-      if (changeDiff) {
-        changeDiff.forEachAddedItem((change) => {
-          this.addModelObject(change.item);
-        });
+        changeDiff = this._differ.diff(fsModelObjects);
+        if (changeDiff) {
+          changeDiff.forEachAddedItem((change) => {
+            this._addModelObject(change.item);
+          });
 
-        changeDiff.forEachRemovedItem((change) => {
-          this.removeModelObject(change.item);
-        });
-      }
-    });
+          changeDiff.forEachRemovedItem((change) => {
+            this._removeModelObject(change.item);
+          });
+        }
+      });
   }
 
   public applyConnectionConfig(connection, config: ConnectionConfig = {}) {
@@ -117,12 +123,45 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
       connection.setConnector(config.connector);
     }
 
-    connection.setData({ data: config.data });
+    connection.setData(config.data);
     connection.addClass('fs-model-connection');
+    connection.scope = config.name;
+
+    const tooltipId = 'tooltip_' + connection.id;
 
     if (config) {
 
       connection.addClass('fs-model-clickable');
+      if (config.tooltip) {
+        connection.bind('mouseover', (conn, event) => {
+          const tip = document.querySelector(`.fs-model-connection-tooltip_${conn.id}`);
+          if (tip) {
+
+            if (conn.tooltipTimer) {
+              clearInterval(conn.tooltipTimer);
+            }
+
+            tip.classList.add('show');
+          }
+        });
+
+        connection.bind('mouseout', (conn, event) => {
+          const tip = document.querySelector(`.fs-model-connection-tooltip_${conn.id}`);
+
+          if (tip) {
+            conn.tooltipTimer = setTimeout(() => {
+              tip.classList.remove('show');
+            }, 100);
+          }
+        });
+
+        connection.addOverlay([ConnectionOverlayType.Label,
+          {
+            label: `<div class="fs-model-connection-tooltip fs-model-connection-tooltip_${connection.id}">${config.tooltip}</div>`,
+            id: tooltipId,
+            cssClass: 'fs-model-connection-tooltip-overlay'
+          }]);
+      }
 
       connection.bind('click', (e, originalEvent) => {
         const data = {
@@ -132,13 +171,27 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
         };
 
         if (e.type) {
-          const overlay = filter(config.overlays, { id: e.id })[0];
 
-          if (overlay && overlay.click) {
-            overlay.click.bind(this)(data);
+          if (tooltipId === e.id) {
+            // If the connection tooltip is clicked
+            if (config.click) {
+              config.click.bind(this)(data);
+            }
+
+          } else {
+
+            // If the overlay is clicked
+            const overlay = filter(config.overlays, { id: e.id })[0];
+
+            if (overlay && overlay.click) {
+              overlay.click.bind(this)(data);
+            }
           }
         } else {
-          config.click.bind(this)(data);
+          // If the connection tooltip is clicked
+          if (config.click) {
+            config.click.bind(this)(data);
+          }
         }
       });
 
@@ -159,7 +212,7 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
             let label = overlay.label;
 
             if (overlay.tooltip) {
-              label += '<div class="fs-model-connection-tooltip">' + overlay.tooltip + '</div>';
+              label += '<div class="fs-model-connection-label-tooltip">' + overlay.tooltip + '</div>';
             }
 
             connection.addOverlay([overlay.type,
@@ -213,34 +266,48 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
     this._jsPlumb.deleteConnection(connection);
   }
 
-  public getConnections({ target, source }) {
+  public getConnections(options: { target?: any, source?: any, name?: string }) {
 
-    const sourceModel = this._modelObjects.get(source);
-    const targetModel = this._modelObjects.get(target);
+    const sourceModel = this._modelObjects.get(options.source);
+    const targetModel = this._modelObjects.get(options.target);
 
     if (targetModel && sourceModel) {
       return this._jsPlumb.getConnections({
         source: sourceModel.element.nativeElement,
-        target: targetModel.element.nativeElement
+        target: targetModel.element.nativeElement,
+        scope: options.name || '*'
       });
-    }
 
-    if (sourceModel) {
+    } else if (sourceModel) {
       return this._jsPlumb.getConnections({
-        source: sourceModel.element.nativeElement
+        source: sourceModel.element.nativeElement,
+        scope: options.name || '*'
       });
-    }
 
-    if (targetModel) {
+    } else if (targetModel) {
       return this._jsPlumb.getConnections({
-        target: targetModel.element.nativeElement
+        target: targetModel.element.nativeElement,
+        scope: options.name || '*'
+      });
+
+    } else if (options.name) {
+      return this._jsPlumb.getConnections({
+        scope: options.name
       });
     }
 
-    return [];
+    return this.jsPlumb.getAllConnections();
   }
 
-  private addModelObject(directive: FsModelObjectDirective) {
+  public repaint() {
+    this.jsPlumb.repaintEverything();
+  }
+
+  public getModelObjectDirective(data: any): FsModelObjectDirective {
+    return this._modelObjects.get(data);
+  }
+
+  private _addModelObject(directive: FsModelObjectDirective) {
     directive.init(this._jsPlumb, this);
     this._modelObjects.set(directive.data, directive);
 
@@ -257,7 +324,7 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
     }
   }
 
-  private removeModelObject(modelObject: FsModelObjectDirective) {
+  private _removeModelObject(modelObject: FsModelObjectDirective) {
 
     this._jsPlumb.getConnections({
       source: modelObject.element.nativeElement
@@ -271,7 +338,7 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
     this._modelObjects.delete(modelObject.data);
   }
 
-  private init() {
+  private _init() {
 
     this._jsPlumb = jsPlumb.getInstance();
     this._jsPlumb.bind('connection', (info: any, e: Event) => {
@@ -305,8 +372,8 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
         PaintStyle: {
           stroke: this.config.paintStyle.stroke,
           strokeWidth: this.config.paintStyle.strokeWidth,
-          outlineStroke: 'transparent',
-          outlineWidth: 0,
+          outlineStroke: 'transparent-',
+          outlineWidth: 5,
           dashstyle : '0'
         },
         HoverPaintStyle: {
@@ -333,11 +400,5 @@ export class FsModelDirective implements AfterViewInit, OnInit, OnDestroy {
             ]
         ]
       });
-  }
-
-  ngOnDestroy() {
-    this._jsPlumb.reset();
-    this._destroy$.next();
-    this._destroy$.complete();
   }
 }

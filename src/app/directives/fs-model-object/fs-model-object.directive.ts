@@ -9,6 +9,7 @@ import {
   Output,
   OnDestroy
 } from '@angular/core';
+import { uniq } from 'lodash-es';
 import { FsModelDirective } from '../fs-model/fs-model.directive';
 
 
@@ -34,7 +35,6 @@ export class FsModelObjectDirective implements OnDestroy {
 
   @HostListener('click', ['$event'])
   onClick(e) {
-
     const xDelta = Math.abs(this._mouseDownEvent.screenX - this._mouseUpEvent.screenX);
     const yDelta = Math.abs(this._mouseDownEvent.screenY - this._mouseUpEvent.screenY);
 
@@ -67,19 +67,21 @@ export class FsModelObjectDirective implements OnDestroy {
     this.y1 = value;
   }
 
-  constructor(private _element: ElementRef) {
-  }
+  private _modelDirective: FsModelDirective;
+
+  constructor(private _element: ElementRef) {}
 
   get element(): ElementRef {
     return this._element;
   }
 
-  init(jsPlumb, fsModelDirective: FsModelDirective) {
+  init(jsPlumb, modelDirective: FsModelDirective) {
 
     if (this._jsPlumb) {
       return;
     }
 
+    this._modelDirective = modelDirective;
     this.element.nativeElement.fsModelObjectDirective = this;
     this._jsPlumb = jsPlumb;
 
@@ -145,7 +147,21 @@ export class FsModelObjectDirective implements OnDestroy {
     }
   }
 
-  ngOnDestroy() {
+  public repaint() {
+    this._jsPlumb.revalidate(this.element.nativeElement);
+  }
+
+  public ngOnDestroy() {
+
+    uniq(this._modelDirective.getConnections({
+      target: this.data
+    }).concat(this._modelDirective.getConnections({
+      source: this.data
+    })))
+    .forEach(conn => {
+      this._modelDirective.disconnect(conn);
+    });
+
     this._jsPlumb.unmakeTarget(this.element.nativeElement);
   }
 }
